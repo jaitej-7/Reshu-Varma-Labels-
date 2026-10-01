@@ -10,9 +10,9 @@
 
 :root {
   color-scheme: light;
-  --bg:   #FDFBF7; /* Soft pastel cream/ivory */
-  --ink:  #1A1A1A; /* Deep charcoal text */
-  --muted:#8C8C88; /* Warm muted gray */
+  --bg:   #EAE1D8; /* Rich pastel champagne / muted blush */
+  --ink:  #2D2421; /* Deep espresso brown / warm charcoal */
+  --muted:#8C7F78; /* Muted taupe for secondary text */
   --pad:  15px;
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-ui:      "Manrope", system-ui, sans-serif;
@@ -44,17 +44,18 @@ a { color: inherit; text-decoration: none; }
 .site-header {
   position: fixed;
   inset: 0 0 auto;
-  z-index: 100; /* Must be extremely high so it floats above all sections */
+  z-index: 100; 
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: auto auto 1fr;
+  gap: 20px;
   align-items: start;
-  padding: var(--pad);
+  padding: 1.5rem var(--pad) 3rem;
   pointer-events: none;
   font-size: 11px;
   line-height: 1.2;
   font-family: var(--font-ui);
-  mix-blend-mode: difference; /* Magic blend mode! */
-  color: #fff; /* Starts white, becomes black over white backgrounds */
+  color: var(--ink);
+  transition: color 0.3s ease, background-color 0.3s ease, text-shadow 0.3s ease;
 }
 
 .brand,
@@ -64,6 +65,7 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--font-ui);
   font-weight: 700;
   letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .header-meta {
@@ -90,7 +92,8 @@ a { color: inherit; text-decoration: none; }
 .main-nav {
   display: flex;
   justify-content: flex-end;
-  gap: 11px;
+  gap: 12px 18px;
+  flex-wrap: wrap;
   font-family: var(--font-ui);
   font-weight: 500;
 }
@@ -98,13 +101,24 @@ a { color: inherit; text-decoration: none; }
 .nav-link {
   display: inline-flex;
   gap: 5px;
-  align-items: flex-start;
+  align-items: center; 
   cursor: pointer;
-  transition: opacity 0.2s;
-  color: var(--muted);
+  transition: all 0.3s ease;
+  color: #2D2421; /* Solid dark espresso (no opacity) */
+  opacity: 1; /* Fully visible */
+  font-weight: 500;
+  font-size: 12px; /* Slightly larger for readability */
+  white-space: nowrap;
 }
-.nav-link:hover, .nav-link.is-active { color: var(--ink); opacity: 1; }
-.nav-link.is-active i { background: currentColor; }
+.nav-link:hover, .nav-link.is-active { 
+  font-weight: 800; /* Extra bold when active */
+  color: #000; /* Pure solid black */
+}
+.nav-link.is-active i { 
+  background: #000; 
+  border-color: #000;
+  transform: scale(1.4); 
+}
 .nav-info { margin-left: auto; }
 
 /* ── Hero Grid ───────────────────────────────────────────────────────────── */
@@ -290,8 +304,8 @@ a { color: inherit; text-decoration: none; }
   .wave-field { opacity: 0.12; }
 
   .gallery-wrap { width: 88vw; margin: 0 auto; }
-  .project-card { padding: 58px 0 36px; }
-  .project-card img { height: calc(100svh - 94px); }
+  .project-card { padding: 100px 0 36px; }
+  .project-card img { height: calc(100svh - 136px); }
 
   .project-side {
     top: auto; bottom: 48px;
@@ -326,10 +340,15 @@ a { color: inherit; text-decoration: none; }
   /* subtle shadow so sections cast a shadow on the one below them */
   box-shadow: 0 -20px 40px rgba(0,0,0,0.06);
   z-index: 1;
+  /* This margin creates the "pause/linger" effect before the next section slides over */
+  margin-bottom: 70vh; 
 }
 .overlap-section:first-child {
   box-shadow: none;
   z-index: 0;
+}
+.overlap-section:last-child {
+  margin-bottom: 0;
 }
 
 /* Section 1: Video Hero */
@@ -396,7 +415,8 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--font-display);
   font-size: 3rem;
   font-weight: 400;
-  margin-bottom: 4rem;
+  margin-bottom: 1rem;
+  line-height: 1;
   letter-spacing: 0.05em;
 }
 
@@ -443,21 +463,27 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* About Section */
-.about-content { max-width: 800px; }
+.about-content { 
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
 .about-text {
   font-family: var(--font-display);
-  font-size: 2rem;
-  line-height: 1.5;
-  margin-bottom: 2rem;
+  font-size: 2.2rem;
+  line-height: 1.4;
   color: var(--ink);
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
 }
 
 /* Contact Section */
 .contact-grid {
-  display: flex;
-  gap: 10vw;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 5vw;
   margin-bottom: 4rem;
-  text-align: left;
+  text-align: center;
 }
 .contact-label {
   font-family: var(--font-ui);
@@ -491,5 +517,60 @@ a { color: inherit; text-decoration: none; }
   font-size: 10px;
   letter-spacing: 0.05em;
   color: var(--muted);
+}
+
+
+/* Mask Reveal Utilities */
+.reveal-mask-wrapper { overflow: hidden; display: inline-block; vertical-align: top; }
+.reveal-mask-inner { display: inline-block; transform-origin: top left; }
+
+
+/* Background SVG Graphic */
+.bg-graphic {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100svh;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+.bg-graphic svg {
+  width: 100%;
+  height: 100%;
+  transform: scale(1.1) translate(var(--mx), var(--my));
+}
+
+/* Hero Dark Mode (White Text) */
+.site-header.hero-dark-mode,
+.site-header.hero-dark-mode .brand,
+.site-header.hero-dark-mode .header-meta,
+.site-header.hero-dark-mode .nav-link {
+  color: #FFFFFF;
+  text-shadow: 0px 1px 4px rgba(0,0,0,0.5); /* Prevents white text from vanishing on light videos */
+}
+.site-header.hero-dark-mode .nav-link {
+  opacity: 0.8;
+}
+.site-header.hero-dark-mode .nav-link:hover,
+.site-header.hero-dark-mode .nav-link.is-active {
+  color: #FFFFFF;
+  opacity: 1;
+}
+.site-header.hero-dark-mode .nav-link.is-active i {
+  background: #FFFFFF;
+  border-color: #FFFFFF;
+}
+
+
+/* Hide scrollbar globally */
+::-webkit-scrollbar {
+  display: none;
+}
+
+html, body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 

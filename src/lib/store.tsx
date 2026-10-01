@@ -61,15 +61,17 @@ interface AppContextType {
   setCurrentView: (view: 'storefront' | 'admin') => void;
   activeVariant: 'variant-a' | 'variant-b';
   setActiveVariant: (variant: 'variant-a' | 'variant-b') => void;
-  activePage: 'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact';
+  activePage: 'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact' | 'videos';
   activeCategorySlug: string;
-  setActivePage: (page: 'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact', categorySlug?: string) => void;
+  setActivePage: (page: 'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact' | 'videos', categorySlug?: string) => void;
   adminSection: AdminSection;
   setAdminSection: (section: AdminSection) => void;
   selectedCategoryFilter: string;
   setSelectedCategoryFilter: (cat: string) => void;
   selectedProductModal: Product | null;
   setSelectedProductModal: (prod: Product | null) => void;
+  selectedImageModal: string | null;
+  setSelectedImageModal: (url: string | null) => void;
   isAppointmentModalOpen: boolean;
   setIsAppointmentModalOpen: (open: boolean) => void;
   isTransactionModalOpen: boolean;
@@ -120,16 +122,17 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentView, setCurrentView] = useState<'storefront' | 'admin'>('storefront');
   const [activeVariant, setActiveVariant] = useState<'variant-a' | 'variant-b'>('variant-a');
-  const [activePage, setActivePageState] = useState<'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact'>('home');
+  const [activePage, setActivePageState] = useState<'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact' | 'videos'>('home');
   const [activeCategorySlug, setActiveCategorySlug] = useState<string>('kanchi-silk-sarees');
   const [adminSection, setAdminSection] = useState<AdminSection>('dashboard');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('All');
   const [selectedProductModal, setSelectedProductModal] = useState<Product | null>(null);
+  const [selectedImageModal, setSelectedImageModal] = useState<string | null>(null);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState<boolean>(false);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState<boolean>(false);
   const [transactionProduct, setTransactionProduct] = useState<Product | null>(null);
 
-  const setActivePage = (page: 'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact', categorySlug?: string) => {
+  const setActivePage = (page: 'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact' | 'videos', categorySlug?: string) => {
     setActivePageState(page);
     if (categorySlug) {
       setActiveCategorySlug(categorySlug);
@@ -297,6 +300,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSelectedCategoryFilter,
         selectedProductModal,
         setSelectedProductModal,
+        selectedImageModal,
+        setSelectedImageModal,
         isAppointmentModalOpen,
         setIsAppointmentModalOpen,
         isTransactionModalOpen,
