@@ -235,7 +235,7 @@ export const HomePage: React.FC = () => {
             style={{ paddingLeft: 10 }}
           >
             <i aria-hidden="true" />
-            FILMS & CAMPAIGNS
+            VIDEOS
           </a>
           {activeCategories.map(cat => (
             <a
@@ -391,3 +391,5 @@ export const HomePage: React.FC = () => {
     </div>
   );
 };
+
+

@@ -1,25 +1,23 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from '@studio-freight/lenis';
 import { useAppStore } from '../../lib/store';
 
+gsap.registerPlugin(ScrollTrigger);
+
 export const CategoryPage: React.FC = () => {
-  const { categories, setActivePage, setSelectedImageModal } = useAppStore();
+  const { categories, activeCategorySlug, setActivePage, setSelectedImageModal } = useAppStore();
 
-  const heroRef = useRef<HTMLElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
   const waveRef = useRef<SVGSVGElement>(null);
-  const lastActiveSlug = useRef<string | null>(null);
-
-  // GSAP continuous smooth scroll state
-  const targetY = useRef(0);
-  const currentY = useRef(0);
+  const shellRef = useRef<HTMLElement>(null);
 
   const activeCategories = categories.filter(c => c.status === 'active');
 
-  // Categorize images manually to match the 5 slugs
-  const categorizedImages = [
+  const categorizedImages = useMemo(() => [
     {
       slug: 'kanchi-silk-sarees',
+      name: 'Kanchi Silk Sarees',
       images: [
         '/assets/Brides/0efa0af2-5ea7-418d-ba87-310c31906121.webp',
         '/assets/Brides/IMG_0245.webp',
@@ -35,6 +33,7 @@ export const CategoryPage: React.FC = () => {
     },
     {
       slug: 'bridal-lehengas',
+      name: 'Bridal Lehengas',
       images: [
         '/assets/Bridesmaid/12cf8cd3-2f11-48e2-b11a-32bad4b3192b.webp',
         '/assets/Bridesmaid/3cc1a84b-517d-4f0f-8c27-73965c7961db.webp',
@@ -50,6 +49,39 @@ export const CategoryPage: React.FC = () => {
     },
     {
       slug: 'designer-blouses',
+      name: 'Designer Blouses',
+      images: [
+        '/assets/Brides/IMG_3054.webp',
+        '/assets/Brides/IMG_4051.webp',
+        '/assets/Brides/IMG_5012.webp',
+        '/assets/Brides/IMG_5789.webp',
+        '/assets/Brides/IMG_5880.webp',
+        '/assets/Brides/IMG_6032.webp',
+        '/assets/Brides/IMG_6106.webp',
+        '/assets/Brides/IMG_6114.webp',
+        '/assets/Brides/IMG_6824.webp',
+        '/assets/Brides/IMG_7158.webp',
+      ]
+    },
+    {
+      slug: 'bridal-veils',
+      name: 'Bridal Veils',
+      images: [
+        '/assets/Bridesmaid/IMG_1829.webp',
+        '/assets/Bridesmaid/IMG_1830.webp',
+        '/assets/Bridesmaid/IMG_1831.webp',
+        '/assets/Bridesmaid/IMG_3905.webp',
+        '/assets/Bridesmaid/IMG_4281.webp',
+        '/assets/Bridesmaid/IMG_4411.webp',
+        '/assets/Bridesmaid/IMG_5697.webp',
+        '/assets/Bridesmaid/IMG_7331.webp',
+        '/assets/Bridesmaid/IMG_7606.webp',
+        '/assets/Bridesmaid/IMG_0696.webp',
+      ]
+    },
+    {
+      slug: 'mens-wear',
+      name: "Men's Wear",
       images: [
         '/assets/Bride and groom/12cf8cd3-2f11-48e2-b11a-32bad4b3192b.webp',
         '/assets/Bride and groom/IMG_0064.webp',
@@ -59,181 +91,65 @@ export const CategoryPage: React.FC = () => {
         '/assets/Bride and groom/IMG_3048.webp',
         '/assets/Bride and groom/IMG_3049.webp',
         '/assets/Bride and groom/IMG_3050.webp',
-      ]
-    },
-    {
-      slug: 'bridal-veils',
-      images: [
-        '/assets/Brides/IMG_3054.webp',
-        '/assets/Brides/IMG_4051.webp',
-        '/assets/Brides/IMG_5012.webp',
-        '/assets/Brides/IMG_5789.webp',
-        '/assets/Brides/IMG_5880.webp',
-        '/assets/Brides/IMG_6032.webp',
-        '/assets/Brides/IMG_6106.webp',
-      ]
-    },
-    {
-      slug: 'mens-wear',
-      images: [
         '/assets/Bride and groom/IMG_3051.webp',
         '/assets/Bride and groom/IMG_3052.webp',
-        '/assets/Bride and groom/IMG_3291.webp',
-        '/assets/Bride and groom/IMG_3358.webp',
-        '/assets/Bride and groom/IMG_3371.webp',
-        '/assets/Bride and groom/IMG_3546.webp',
-        '/assets/Bride and groom/IMG_3641.webp',
-        '/assets/Bride and groom/IMG_4470.webp',
       ]
     }
-  ];
+  ], []);
 
-  const allImages = categorizedImages.flatMap(cat => 
-    cat.images.map(src => ({ src, slug: cat.slug }))
-  );
+  const currentCategory = categorizedImages.find(c => c.slug === activeCategorySlug) || categorizedImages[0];
 
-  // -- 2. Animations ------------------------------------------------
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from('.site-header', {
-        y: -18, opacity: 0, duration: 0.9,
-        ease: 'power3.out', delay: 0.1,
-      });
-      gsap.from(['.hero-label', '.scroll-cue'], {
-        y: 12, opacity: 0, duration: 0.8,
-        ease: 'power2.out', delay: 0.35, stagger: 0.08,
-      });
-      gsap.from('.project-side', {
-        opacity: 0, duration: 0.7,
-        ease: 'power2.out', delay: 0.5,
-      });
+    // Smooth scroll setup
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
     });
-    return () => ctx.revert();
-  }, []);
-
-  // -- 3. Wave Scroll GSAP Ticker & Scrollspy -------------------------
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-
-    // Reset scroll when mounted
-    targetY.current = 0;
-    currentY.current = 0;
-
-    let maxScroll = 0;
-    const updateMaxScroll = () => {
-      maxScroll = Math.max(0, track.scrollWidth - window.innerWidth + window.innerWidth * 0.4);
-    };
-    
-    window.addEventListener('resize', updateMaxScroll);
-    setTimeout(updateMaxScroll, 100);
-
-    const tick = () => {
-      currentY.current = gsap.utils.interpolate(currentY.current, targetY.current, 0.08);
-
-      if (Math.abs(targetY.current - currentY.current) < 0.1) {
-        currentY.current = targetY.current;
-      }
-
-      gsap.set(track, {
-        x: -currentY.current, // Translate horizontally
-        force3D: true
-      });
-      
-      const centerPos = currentY.current + (window.innerWidth / 2);
-      const cards = track.querySelectorAll('.project-card');
-      
-      let minAbsDist = Infinity;
-      let closestSlug = lastActiveSlug.current;
-
-      cards.forEach((card, i) => {
-        const cardCenter = (card as HTMLElement).offsetLeft + ((card as HTMLElement).offsetWidth / 2);
-        const dist = centerPos - cardCenter;
-        const absDist = Math.abs(dist);
-
-        // Find the category of the card closest to the center for scrollspy
-        if (absDist < minAbsDist) {
-          minAbsDist = absDist;
-          const slug = card.getAttribute('data-slug');
-          if (slug) closestSlug = slug;
-        }
-
-        // WAVE MOTION (S-curve based on screen position)
-        const waveY = Math.sin((dist / window.innerWidth) * Math.PI * 1.5) * 140;
-
-        // Scaling & Saturation
-        const scale = gsap.utils.mapRange(0, window.innerWidth / 1.5, 1.1, 0.8, absDist);
-        const clampedScale = Math.max(0.8, Math.min(1.1, scale));
-        
-        const saturate = gsap.utils.mapRange(0, window.innerWidth / 1.5, 1.1, 0.3, absDist);
-        const clampedSaturate = Math.max(0.3, Math.min(1.1, saturate));
-        
-        gsap.set(card, { y: waveY });
-        gsap.set(card.querySelector('img'), {
-          scale: clampedScale,
-          filter: `saturate(${clampedSaturate}) contrast(1.02)`,
-        });
-      });
-
-      // Directly update navbar classes for performance (avoiding React re-renders in ticker)
-      if (closestSlug && closestSlug !== lastActiveSlug.current) {
-        lastActiveSlug.current = closestSlug;
-        document.querySelectorAll('.nav-link').forEach(link => {
-          if (link.getAttribute('data-nav-slug') === closestSlug) {
-            link.classList.add('is-active');
-          } else {
-            link.classList.remove('is-active');
-          }
-        });
-      }
-    };
-
-    gsap.ticker.add(tick);
+    lenis.on('scroll', ScrollTrigger.update);
+    const raf = (time: number) => lenis.raf(time * 1000); gsap.ticker.add(raf);
     gsap.ticker.lagSmoothing(0);
 
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      targetY.current += e.deltaY;
-      targetY.current = Math.max(0, Math.min(targetY.current, maxScroll));
-    };
-
-    window.addEventListener('wheel', onWheel, { passive: false });
+    const ctx = gsap.context(() => {
+      const items = gsap.utils.toArray('.grid-item');
+      gsap.fromTo(items, 
+        { opacity: 0, scale: 0.95 },
+        { opacity: 1, scale: 1, duration: 0.6, stagger: 0.05, ease: 'power2.out' }
+      );
+    }, shellRef);
 
     return () => {
-      gsap.ticker.remove(tick);
-      window.removeEventListener('wheel', onWheel);
-      window.removeEventListener('resize', updateMaxScroll);
+      lenis.destroy(); gsap.ticker.remove(raf);
+      ctx.revert();
     };
-  }, []);
+  }, [currentCategory.slug]);
 
-  // -- 4. Mouse Parallax --------------------------------------------
   useEffect(() => {
-    const hero = heroRef.current;
+    const shell = shellRef.current;
     const wave = waveRef.current;
-    if (!hero || !wave) return;
+    if (!shell || !wave) return;
 
     const setX = gsap.quickTo(wave, '--mx', { duration: 1.4, ease: 'power1.out' });
     const setY = gsap.quickTo(wave, '--my', { duration: 1.4, ease: 'power1.out' });
 
     const onMove = (e: PointerEvent) => {
-      const r = hero.getBoundingClientRect();
+      const r = shell.getBoundingClientRect();
       setX(((e.clientX - r.left) / r.width - 0.5) * 24);
       setY(((e.clientY - r.top) / r.height - 0.5) * 16);
     };
     const onLeave = () => { setX(0); setY(0); };
 
-    hero.addEventListener('pointermove', onMove);
-    hero.addEventListener('pointerleave', onLeave);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerleave', onLeave);
 
     return () => {
-      hero.removeEventListener('pointermove', onMove);
-      hero.removeEventListener('pointerleave', onLeave);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerleave', onLeave);
     };
   }, []);
 
   return (
-    <main className="site-shell">
-      {/* -- Header ------------------------------------------ */}
+    <main className="site-shell" ref={shellRef}>
       <header className="site-header">
         <a 
           className="brand" 
@@ -258,28 +174,23 @@ export const CategoryPage: React.FC = () => {
               setActivePage('videos');
             }}
             href="#videos"
+            style={{ paddingLeft: 10 }}
           >
             <i aria-hidden="true" />
-            FILMS
+            VIDEOS
           </a>
-          {activeCategories.map((cat, i) => {
+          {activeCategories.map((cat) => {
             const count = categorizedImages.find(c => c.slug === cat.slug)?.images.length || 0;
             return (
               <a
                 key={cat.id}
                 data-nav-slug={cat.slug}
-                className={`nav-link ${i === 0 ? 'is-active' : ''}`}
+                className={"nav-link " + (currentCategory.slug === cat.slug ? 'is-active' : '')}
                 onClick={(e) => {
                   e.preventDefault();
-                  // Find the first image of this category and scroll to it
-                  const track = trackRef.current;
-                  const firstCard = track?.querySelector(`.project-card[data-slug="${cat.slug}"]`) as HTMLElement;
-                  if (track && firstCard) {
-                    const centerOffset = window.innerWidth / 2 - firstCard.offsetWidth / 2;
-                    targetY.current = Math.max(0, firstCard.offsetLeft - centerOffset);
-                  }
+                  setActivePage('category', cat.slug);
                 }}
-                href={`#${cat.slug}`}
+                href={"#" + cat.slug}
               >
                 <i aria-hidden="true" />
                 <span>{cat.name.toUpperCase()} <span>({count})</span></span>
@@ -289,70 +200,82 @@ export const CategoryPage: React.FC = () => {
         </nav>
       </header>
 
-      {/* -- Background SVG Graphic --------------------------------- */}
-      <div className="bg-graphic" aria-hidden="true">
+      <div className="bg-graphic" aria-hidden="true" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 0 }}>
         <svg
           ref={waveRef}
           viewBox="0 0 1000 1000"
           preserveAspectRatio="none"
           style={{ '--mx': '0px', '--my': '0px' } as React.CSSProperties}
         >
-          <path 
-            d="M0,200 C300,300 700,100 1000,200 L1000,1000 L0,1000 Z" 
-            fill="none" 
-            stroke="var(--muted)" 
-            strokeWidth="0.5" 
-            opacity="0.2"
-          />
-          <path 
-            d="M0,400 C300,500 700,300 1000,400 L1000,1000 L0,1000 Z" 
-            fill="none" 
-            stroke="var(--muted)" 
-            strokeWidth="0.5" 
-            opacity="0.15"
-          />
-          <path 
-            d="M0,600 C300,700 700,500 1000,600 L1000,1000 L0,1000 Z" 
-            fill="none" 
-            stroke="var(--muted)" 
-            strokeWidth="0.5" 
-            opacity="0.1"
-          />
+          <path d="M0,200 C300,300 700,100 1000,200 L1000,1000 L0,1000 Z" fill="none" stroke="var(--muted)" strokeWidth="0.5" opacity="0.2" />
+          <path d="M0,400 C300,500 700,300 1000,400 L1000,1000 L0,1000 Z" fill="none" stroke="var(--muted)" strokeWidth="0.5" opacity="0.15" />
+          <path d="M0,600 C300,700 700,500 1000,600 L1000,1000 L0,1000 Z" fill="none" stroke="var(--muted)" strokeWidth="0.5" opacity="0.1" />
         </svg>
       </div>
 
-      <section className="hero" ref={heroRef}>
-        {/* Horizontal Slider with Wavy Motion */}
-        <div className="gallery-wrap" id="work">
-          <div className="gallery">
-            <div className="gallery-track" ref={trackRef}>
-              {allImages.map((img, i) => (
-                <div 
-                  key={i} 
-                  className="project-card" 
-                  data-slug={img.slug}
-                  onClick={() => setSelectedImageModal(img.src)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <img src={img.src} alt={img.slug} style={{ pointerEvents: 'none' }} />
-                </div>
-              ))}
-            </div>
+      <div className="vertical-gallery-wrap" style={{ position: 'relative', zIndex: 1, padding: '160px 2rem 100px 2rem', maxWidth: '1000px', margin: '0 auto', minHeight: '100vh' }}>
+        <section id={currentCategory.slug} className="category-section" style={{ marginBottom: '4rem' }}>
+          <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: '24px', letterSpacing: '0.1em', marginBottom: '4rem', color: 'var(--ink)', textAlign: 'center', opacity: 0.8 }}>
+            {currentCategory.name.toUpperCase()}
+          </h2>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', width: '100%' }}>
+            {currentCategory.images.map((imgSrc, idx) => (
+              <div 
+                key={currentCategory.slug + "-" + idx} 
+                className="grid-item"
+                onClick={() => setSelectedImageModal(imgSrc)}
+                style={{ 
+                  aspectRatio: '1 / 1',
+                  cursor: 'pointer',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  backgroundColor: 'rgba(0,0,0,0.02)',
+                  borderRadius: '4px'
+                }}
+                onMouseEnter={(e) => {
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1.03)';
+                }}
+                onMouseLeave={(e) => {
+                  const img = e.currentTarget.querySelector('img');
+                  if (img) img.style.transform = 'scale(1)';
+                }}
+              >
+                <img 
+                  src={imgSrc} 
+                  alt={currentCategory.name + " " + (idx + 1)} 
+                  style={{ 
+                    width: '100%', 
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                    transition: 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                    transformOrigin: 'center center'
+                  }} 
+                />
+              </div>
+            ))}
           </div>
-        </div>
+        </section>
+      </div>
 
-        {/* Scroll cue */}
-        <div className="scroll-cue" aria-hidden="true"><span /></div>
-        
-        {/* Bottom Labels (Matching Design) */}
-        <div className="hero-label" style={{ position: 'absolute', bottom: '2rem', left: '2rem', display: 'flex', gap: '30px', fontSize: '10px', letterSpacing: '0.1em', opacity: 0.8 }}><span>RESHU VARMA LABEL &copy; 2026</span><a href="https://instagram.com/reshuvarmalabel" target="_blank" rel="noreferrer" style={{ textDecoration: 'none', color: 'inherit', transition: 'opacity 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>IG: @reshuvarmalabel</a><a href="https://facebook.com/reshuvarmalabel" target="_blank" rel="noreferrer" style={{ textDecoration: 'none', color: 'inherit', transition: 'opacity 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>FB: @reshuvarmalabel</a></div>
-        <div className="hero-label label-right-top" style={{ bottom: '2rem', right: '2rem', fontSize: '10px', letterSpacing: '0.1em', opacity: 0.8 }}>
-          {allImages.length} PRODUCTS
+      <footer style={{ position: 'relative', width: '100%', padding: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+        <div className="hero-label" style={{ display: 'flex', gap: '30px', fontSize: '10px', letterSpacing: '0.1em', opacity: 0.8 }}>
+          <span>RESHU VARMA LABEL &copy; 2026</span>
+          <a href="https://instagram.com/reshuvarmalabel" target="_blank" rel="noreferrer" style={{ textDecoration: 'none', color: 'inherit', transition: 'opacity 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>IG: @reshuvarmalabel</a>
+          <a href="https://facebook.com/reshuvarmalabel" target="_blank" rel="noreferrer" style={{ textDecoration: 'none', color: 'inherit', transition: 'opacity 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>FB: @reshuvarmalabel</a>
         </div>
-      </section>
+        <div className="hero-label label-right-top" style={{ display: 'flex', gap: '20px', fontSize: '10px', letterSpacing: '0.1em', opacity: 0.8 }}>
+          <span style={{ cursor: 'pointer', transition: 'opacity 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'} onClick={() => setActivePage('terms')}>TERMS</span>
+          <span style={{ cursor: 'pointer', transition: 'opacity 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'} onClick={() => setActivePage('privacy')}>PRIVACY</span>
+          <span style={{ cursor: 'pointer', transition: 'opacity 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'} onMouseLeave={(e) => e.currentTarget.style.opacity = '1'} onClick={() => setActivePage('disclaimer')}>DISCLAIMER</span>
+        </div>
+      </footer>
 
-      {/* Film grain */}
-      <div className="grain" aria-hidden="true" />
+      <div className="grain" aria-hidden="true" style={{ position: 'fixed' }} />
     </main>
   );
 };
+
+

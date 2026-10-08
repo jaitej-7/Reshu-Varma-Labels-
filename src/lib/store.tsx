@@ -61,9 +61,9 @@ interface AppContextType {
   setCurrentView: (view: 'storefront' | 'admin') => void;
   activeVariant: 'variant-a' | 'variant-b';
   setActiveVariant: (variant: 'variant-a' | 'variant-b') => void;
-  activePage: 'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact' | 'videos';
+  activePage: 'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact' | 'videos' | 'terms' | 'disclaimer' | 'privacy';
   activeCategorySlug: string;
-  setActivePage: (page: 'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact' | 'videos', categorySlug?: string) => void;
+  setActivePage: (page: 'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact' | 'videos' | 'terms' | 'disclaimer' | 'privacy', categorySlug?: string) => void;
   adminSection: AdminSection;
   setAdminSection: (section: AdminSection) => void;
   selectedCategoryFilter: string;
@@ -122,7 +122,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentView, setCurrentView] = useState<'storefront' | 'admin'>('storefront');
   const [activeVariant, setActiveVariant] = useState<'variant-a' | 'variant-b'>('variant-a');
-  const [activePage, setActivePageState] = useState<'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact' | 'videos'>('home');
+  const [activePage, setActivePageState] = useState<'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact' | 'videos' | 'terms' | 'disclaimer' | 'privacy'>('home');
   const [activeCategorySlug, setActiveCategorySlug] = useState<string>('kanchi-silk-sarees');
   const [adminSection, setAdminSection] = useState<AdminSection>('dashboard');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('All');
@@ -132,7 +132,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState<boolean>(false);
   const [transactionProduct, setTransactionProduct] = useState<Product | null>(null);
 
-  const setActivePage = (page: 'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact' | 'videos', categorySlug?: string) => {
+  const setActivePage = (page: 'home' | 'category' | 'atelier' | 'real-brides' | 'lookbook' | 'contact' | 'videos' | 'terms' | 'disclaimer' | 'privacy', categorySlug?: string) => {
     setActivePageState(page);
     if (categorySlug) {
       setActiveCategorySlug(categorySlug);
@@ -350,3 +350,4 @@ export const useAppStore = () => {
   }
   return context;
 };
+

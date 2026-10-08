@@ -84,13 +84,25 @@ export const ImageModal: React.FC = () => {
           boxShadow: '0 30px 60px rgba(0,0,0,0.1)'
         }}
       >
-        {/* Left Side: Auto-sized Clear Image */}
+        {/* Left Side: Auto-sized Clear Image / Video */}
         <div style={{ alignSelf: 'stretch', backgroundColor: '#f9f9f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img 
-            src={selectedImageModal} 
-            alt="Selected look" 
-            style={{ width: 'auto', height: '100%', maxHeight: '92vh', objectFit: 'contain', display: 'block' }} 
-          />
+          {selectedImageModal.match(/\.(mp4|webm|mov|ogg)$/i) ? (
+            <video 
+              src={selectedImageModal} 
+              autoPlay 
+              loop 
+              muted 
+              playsInline
+              controls
+              style={{ width: 'auto', height: '100%', maxHeight: '92vh', objectFit: 'contain', display: 'block', outline: 'none' }} 
+            />
+          ) : (
+            <img 
+              src={selectedImageModal} 
+              alt="Selected look" 
+              style={{ width: 'auto', height: '100%', maxHeight: '92vh', objectFit: 'contain', display: 'block' }} 
+            />
+          )}
         </div>
 
         {/* Right Side: Inquiry Form */}
@@ -191,3 +203,4 @@ export const ImageModal: React.FC = () => {
     </div>
   );
 };
+
